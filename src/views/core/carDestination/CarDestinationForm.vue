@@ -7,11 +7,11 @@
       label-width="100px"
       v-loading="formLoading"
     >
-      <el-form-item label="车牌号" prop="carNumber">
-        <el-input v-model="formData.carNumber" placeholder="请输入" />
+      <el-form-item label="地点" prop="place">
+        <el-input v-model="formData.place" placeholder="请输入" />
       </el-form-item>
-      <el-form-item label="公里数" prop="mileage">
-        <el-input-number v-model="formData.mileage" placeholder="请输入" :min="0" :precision="2" />
+      <el-form-item label="距离" prop="distance">
+        <el-input-number v-model="formData.distance" placeholder="请输入" :min="0" :precision="2" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -21,10 +21,10 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { CarInfoApi, CarInfo } from '@/api/core/carinfo'
+import { CarDestinationApi, CarDestination } from '@/api/core/carinfo/carDestination'
 
 /** 车辆信息 表单 */
-defineOptions({ name: 'CarInfoForm' })
+defineOptions({ name: 'CarDestinationForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -35,12 +35,12 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
-  carNumber: undefined,
-  mileage: undefined
+  place: undefined,
+  distance: undefined
 })
 const formRules = reactive({
-  carNumber: [{ required: true, message: '车牌号不能为空', trigger: 'blur' }],
-  mileage: [{ required: true, message: '公里数不能为空', trigger: 'blur' }]
+  place: [{ required: true, message: '地点不能为空', trigger: 'blur' }],
+  distance: [{ required: true, message: '距离不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -54,7 +54,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await CarInfoApi.getCarInfo(id)
+      formData.value = await CarDestinationApi.getCarDestination(id)
     } finally {
       formLoading.value = false
     }
@@ -70,12 +70,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as CarInfo
+    const data = formData.value as unknown as CarDestination
     if (formType.value === 'create') {
-      await CarInfoApi.createCarInfo(data)
+      await CarDestinationApi.createCarDestination(data)
       message.success(t('common.createSuccess'))
     } else {
-      await CarInfoApi.updateCarInfo(data)
+      await CarDestinationApi.updateCarDestination(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
@@ -90,8 +90,8 @@ const submitForm = async () => {
 const resetForm = () => {
   formData.value = {
     id: undefined,
-    carNumber: undefined,
-    mileage: undefined
+    place: undefined,
+    distance: undefined
   }
   formRef.value?.resetFields()
 }

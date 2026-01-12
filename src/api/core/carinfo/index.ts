@@ -1,17 +1,23 @@
 import request from '@/config/axios'
-import type { Dayjs } from 'dayjs';
+import type { Dayjs } from 'dayjs'
 
 /** 车辆信息信息 */
 export interface CarInfo {
-          id: number; // 编号
-          carNumber?: string; // 名字
-  }
+  id: number // 编号
+  carNumber?: string // 名字
+  mileage?: number // 公里数
+}
 
 // 车辆信息 API
 export const CarInfoApi = {
   // 查询车辆信息分页
   getCarInfoPage: async (params: any) => {
     return await request.get({ url: `/core/car-info/page`, params })
+  },
+
+  // 查询车辆信息列表
+  getCarInfoList: async (params: any) => {
+    return await request.get({ url: `/core/car-info/list`, params })
   },
 
   // 查询车辆信息详情

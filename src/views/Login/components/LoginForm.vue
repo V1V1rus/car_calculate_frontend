@@ -15,7 +15,7 @@
           <LoginFormTitle class="w-full" />
         </el-form-item>
       </el-col>
-      <el-col :span="24" class="px-10px">
+      <!-- <el-col :span="24" class="px-10px">
         <el-form-item v-if="loginData.tenantEnable === 'true'" prop="tenantName">
           <el-input
             v-model="loginData.loginForm.tenantName"
@@ -25,7 +25,7 @@
             type="primary"
           />
         </el-form-item>
-      </el-col>
+      </el-col> -->
       <el-col :span="24" class="px-10px">
         <el-form-item prop="username">
           <el-input
@@ -113,7 +113,7 @@
           </el-row>
         </el-form-item>
       </el-col>
-      <el-divider content-position="center">{{ t('login.otherLogin') }}</el-divider>
+      <!-- <el-divider content-position="center">{{ t('login.otherLogin') }}</el-divider>
       <el-col :span="24" class="px-10px">
         <el-form-item>
           <div class="w-full flex justify-between">
@@ -143,7 +143,7 @@
             </el-link>
           </div>
         </el-form-item>
-      </el-col>
+      </el-col> -->
     </el-row>
   </el-form>
 </template>

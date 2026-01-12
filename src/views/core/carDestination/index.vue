@@ -8,9 +8,9 @@
       :inline="true"
       label-width="68px"
     >
-      <el-form-item label="车牌号" prop="carNumber">
+      <el-form-item label="地点" prop="place">
         <el-input
-          v-model="queryParams.carNumber"
+          v-model="queryParams.place"
           placeholder="请输入"
           clearable
           @keyup.enter="handleQuery"
@@ -48,15 +48,15 @@
       <el-table-column type="selection" width="55" />
       <el-table-column label="序号" align="center" type="index" width="55" />
       <el-table-column
-        prop="carNumber"
-        label="车牌号"
+        prop="place"
+        label="地点"
         min-width="150"
         align="center"
         show-overflow-tooltip
       />
       <el-table-column
-        prop="mileage"
-        label="公里数"
+        prop="distance"
+        label="距离"
         min-width="150"
         align="center"
         show-overflow-tooltip
@@ -87,29 +87,28 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <CarInfoForm ref="formRef" @success="getList" />
+  <CarDestinationForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
 import { isEmpty } from '@/utils/is'
 import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
-import { CarInfoApi, CarInfo } from '@/api/core/carinfo'
-import CarInfoForm from './CarInfoForm.vue'
+import { CarDestinationApi, CarDestination } from '@/api/core/carinfo/carDestination'
+import CarDestinationForm from './CarDestinationForm.vue'
 
-/** 车辆信息 列表 */
-defineOptions({ name: 'CarInfo' })
+defineOptions({ name: 'CarDestination' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const list = ref<CarInfo[]>([]) // 列表的数据
+const list = ref<CarDestination[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  carNumber: undefined
+  place: undefined
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
@@ -118,7 +117,7 @@ const exportLoading = ref(false) // 导出的加载中
 const getList = async () => {
   loading.value = true
   try {
-    const data = await CarInfoApi.getCarInfoPage(queryParams)
+    const data = await CarDestinationApi.getCarDestinationPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -150,7 +149,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await CarInfoApi.deleteCarInfo(id)
+    await CarDestinationApi.deleteCarDestination(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -162,14 +161,14 @@ const handleDeleteBatch = async () => {
   try {
     // 删除的二次确认
     await message.delConfirm()
-    await CarInfoApi.deleteCarInfoList(checkedIds.value)
+    await CarDestinationApi.deleteCarDestinationList(checkedIds.value)
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}
 }
 
 const checkedIds = ref<number[]>([])
-const handleRowCheckboxChange = (records: CarInfo[]) => {
+const handleRowCheckboxChange = (records: CarDestination[]) => {
   checkedIds.value = records.map((item) => item.id)
 }
 
@@ -180,8 +179,8 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await CarInfoApi.exportCarInfo(queryParams)
-    download.excel(data, '车辆信息.xls')
+    const data = await CarDestinationApi.exportCarDestination(queryParams)
+    download.excel(data, '目的地信息.xls')
   } catch {
   } finally {
     exportLoading.value = false

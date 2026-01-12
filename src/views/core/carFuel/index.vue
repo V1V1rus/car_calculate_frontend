@@ -17,6 +17,16 @@
           class="!w-240px"
         />
       </el-form-item>
+      <el-form-item label="加油时间" prop="fuelTime">
+        <el-date-picker
+          v-model="queryParams.fuelTime"
+          value-format="YYYY-MM-DD"
+          type="daterange"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          class="!w-220px"
+        />
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="handleQuery"
           ><Icon icon="ep:search" class="mr-5px" /> 搜索</el-button
@@ -45,11 +55,41 @@
       :show-overflow-tooltip="true"
       @selection-change="handleRowCheckboxChange"
     >
-      <el-table-column type="selection" width="55" />
-      <el-table-column label="序号" align="center" type="index" width="55" />
+      <el-table-column type="selection" width="55" fixed="left" />
+      <el-table-column label="序号" align="center" type="index" width="55" fixed="left" />
       <el-table-column
         prop="carNumber"
         label="车牌号"
+        min-width="150"
+        align="center"
+        show-overflow-tooltip
+        fixed="left"
+      />
+      <el-table-column
+        prop="fuelTime"
+        label="加油时间"
+        min-width="150"
+        align="center"
+        show-overflow-tooltip
+        :formatter="dateFormatter2"
+      />
+      <el-table-column
+        prop="fuelCharge"
+        label="加油量"
+        min-width="150"
+        align="center"
+        show-overflow-tooltip
+      />
+      <el-table-column
+        prop="money"
+        label="加油金额"
+        min-width="150"
+        align="center"
+        show-overflow-tooltip
+      />
+      <el-table-column
+        prop="unitPrice"
+        label="油价"
         min-width="150"
         align="center"
         show-overflow-tooltip
@@ -68,8 +108,11 @@
         :formatter="dateFormatter"
         min-width="150"
       />
-      <el-table-column label="操作" align="center" min-width="120px">
+      <el-table-column label="操作" align="center" min-width="200px" fixed="right">
         <template #default="scope">
+          <el-button link type="primary" @click="createJourney(scope.row.id)">
+            生成行程单
+          </el-button>
           <el-button link type="primary" @click="openForm('update', scope.row.id)">
             编辑
           </el-button>
@@ -87,29 +130,29 @@
   </ContentWrap>
 
   <!-- 表单弹窗：添加/修改 -->
-  <CarInfoForm ref="formRef" @success="getList" />
+  <CarFuelForm ref="formRef" @success="getList" />
 </template>
 
 <script setup lang="ts">
 import { isEmpty } from '@/utils/is'
-import { dateFormatter } from '@/utils/formatTime'
+import { dateFormatter, dateFormatter2 } from '@/utils/formatTime'
 import download from '@/utils/download'
-import { CarInfoApi, CarInfo } from '@/api/core/carinfo'
-import CarInfoForm from './CarInfoForm.vue'
+import { CarFuelApi, CarFuel } from '@/api/core/carinfo/carFuel'
+import CarFuelForm from './CarFuelForm.vue'
 
-/** 车辆信息 列表 */
-defineOptions({ name: 'CarInfo' })
+defineOptions({ name: 'CarFuel' })
 
 const message = useMessage() // 消息弹窗
 const { t } = useI18n() // 国际化
 
 const loading = ref(true) // 列表的加载中
-const list = ref<CarInfo[]>([]) // 列表的数据
+const list = ref<CarFuel[]>([]) // 列表的数据
 const total = ref(0) // 列表的总页数
 const queryParams = reactive({
   pageNo: 1,
   pageSize: 10,
-  carNumber: undefined
+  carNumber: undefined,
+  fuelTime: []
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
@@ -118,7 +161,7 @@ const exportLoading = ref(false) // 导出的加载中
 const getList = async () => {
   loading.value = true
   try {
-    const data = await CarInfoApi.getCarInfoPage(queryParams)
+    const data = await CarFuelApi.getCarFuelPage(queryParams)
     list.value = data.list
     total.value = data.total
   } finally {
@@ -150,7 +193,7 @@ const handleDelete = async (id: number) => {
     // 删除的二次确认
     await message.delConfirm()
     // 发起删除
-    await CarInfoApi.deleteCarInfo(id)
+    await CarFuelApi.deleteCarFuel(id)
     message.success(t('common.delSuccess'))
     // 刷新列表
     await getList()
@@ -162,14 +205,14 @@ const handleDeleteBatch = async () => {
   try {
     // 删除的二次确认
     await message.delConfirm()
-    await CarInfoApi.deleteCarInfoList(checkedIds.value)
+    await CarFuelApi.deleteCarFuelList(checkedIds.value)
     message.success(t('common.delSuccess'))
     await getList()
   } catch {}
 }
 
 const checkedIds = ref<number[]>([])
-const handleRowCheckboxChange = (records: CarInfo[]) => {
+const handleRowCheckboxChange = (records: CarFuel[]) => {
   checkedIds.value = records.map((item) => item.id)
 }
 
@@ -180,8 +223,8 @@ const handleExport = async () => {
     await message.exportConfirm()
     // 发起导出
     exportLoading.value = true
-    const data = await CarInfoApi.exportCarInfo(queryParams)
-    download.excel(data, '车辆信息.xls')
+    const data = await CarFuelApi.exportCarFuel(queryParams)
+    download.excel(data, '加油信息.xls')
   } catch {
   } finally {
     exportLoading.value = false

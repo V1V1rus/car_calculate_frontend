@@ -7,11 +7,8 @@
       label-width="100px"
       v-loading="formLoading"
     >
-      <el-form-item label="车牌号" prop="carNumber">
-        <el-input v-model="formData.carNumber" placeholder="请输入" />
-      </el-form-item>
-      <el-form-item label="公里数" prop="mileage">
-        <el-input-number v-model="formData.mileage" placeholder="请输入" :min="0" :precision="2" />
+      <el-form-item label="名称" prop="name">
+        <el-input v-model="formData.name" placeholder="请输入" />
       </el-form-item>
     </el-form>
     <template #footer>
@@ -21,10 +18,10 @@
   </Dialog>
 </template>
 <script setup lang="ts">
-import { CarInfoApi, CarInfo } from '@/api/core/carinfo'
+import { CarUserApi, CarUser } from '@/api/core/carinfo/carUser'
 
 /** 车辆信息 表单 */
-defineOptions({ name: 'CarInfoForm' })
+defineOptions({ name: 'CarUserForm' })
 
 const { t } = useI18n() // 国际化
 const message = useMessage() // 消息弹窗
@@ -35,12 +32,10 @@ const formLoading = ref(false) // 表单的加载中：1）修改时的数据加
 const formType = ref('') // 表单的类型：create - 新增；update - 修改
 const formData = ref({
   id: undefined,
-  carNumber: undefined,
-  mileage: undefined
+  name: undefined
 })
 const formRules = reactive({
-  carNumber: [{ required: true, message: '车牌号不能为空', trigger: 'blur' }],
-  mileage: [{ required: true, message: '公里数不能为空', trigger: 'blur' }]
+  name: [{ required: true, message: '名称不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 
@@ -54,7 +49,7 @@ const open = async (type: string, id?: number) => {
   if (id) {
     formLoading.value = true
     try {
-      formData.value = await CarInfoApi.getCarInfo(id)
+      formData.value = await CarUserApi.getCarUser(id)
     } finally {
       formLoading.value = false
     }
@@ -70,12 +65,12 @@ const submitForm = async () => {
   // 提交请求
   formLoading.value = true
   try {
-    const data = formData.value as unknown as CarInfo
+    const data = formData.value as unknown as CarUser
     if (formType.value === 'create') {
-      await CarInfoApi.createCarInfo(data)
+      await CarUserApi.createCarUser(data)
       message.success(t('common.createSuccess'))
     } else {
-      await CarInfoApi.updateCarInfo(data)
+      await CarUserApi.updateCarUser(data)
       message.success(t('common.updateSuccess'))
     }
     dialogVisible.value = false
