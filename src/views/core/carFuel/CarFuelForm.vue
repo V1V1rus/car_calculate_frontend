@@ -51,14 +51,15 @@
           style="width: 80%"
         />
       </el-form-item>
-      <el-form-item label="公里数" prop="mileage">
+      <el-form-item label="车表里程数" prop="mileage">
         <el-input-number
           v-model="formData.mileage"
-          placeholder="请输入公里数"
+          placeholder="请输入车表里程数"
           clearable
           style="width: 80%"
         />
       </el-form-item>
+      <span>旧车表里程数： {{ formData.oldMileage }}</span>
     </el-form>
     <template #footer>
       <el-button @click="submitForm" type="primary" :disabled="formLoading">确 定</el-button>
@@ -92,7 +93,7 @@ const formData = ref<Partial<CarFuel>>({
   unitPrice: undefined,
   mileage: undefined
 })
-// 自定义校验：公里数不能小于选择的车辆的公里数
+// 自定义校验：车表里程数不能小于选择的车辆的车表里程数
 const validateMileage = (_rule: any, value: any, callback: any) => {
   // 如果值为空，直接通过（required 规则会处理空值校验）
   if (value === undefined || value === null || value === '') {
@@ -106,8 +107,8 @@ const validateMileage = (_rule: any, value: any, callback: any) => {
   }
   const selectedCar = carInfoList.value.find((car) => car.id === formData.value.carId)
   if (selectedCar && selectedCar.mileage !== undefined && selectedCar.mileage !== null) {
-    if (value < selectedCar.mileage) {
-      callback(new Error(`输入的公里数不能小于车辆的公里数(${selectedCar.mileage})`))
+    if (value <= selectedCar.mileage) {
+      callback(new Error(`输入的车表里程数不能小于车辆的车表里程数(${selectedCar.mileage})`))
       return
     }
   }
@@ -133,17 +134,27 @@ const formRules = reactive({
   money: [{ validator: validateRequired('加油金额'), trigger: 'blur' }],
   unitPrice: [{ validator: validateRequired('油价'), trigger: 'blur' }],
   mileage: [
-    { validator: validateRequired('公里数'), trigger: 'blur' },
+    { validator: validateRequired('车表里程数'), trigger: 'blur' },
     { validator: validateMileage, trigger: 'blur' }
   ]
 })
 const formRef = ref() // 表单 Ref
 
-// 监听车辆选择变化，重新校验公里数
+// 监听车辆选择变化，重新校验车表里程数，并将车辆的mileage放入oldMileage
 watch(
   () => formData.value.carId,
-  () => {
-    // 只有在有公里数值时才触发校验，避免初始化时触发
+  (newCarId) => {
+    // 当选择车辆后，将选中车辆的mileage放入formData.oldMileage
+    if (newCarId) {
+      const selectedCar = carInfoList.value.find((car) => car.id === newCarId)
+      if (selectedCar && selectedCar.mileage !== undefined && selectedCar.mileage !== null) {
+        formData.value.oldMileage = selectedCar.mileage
+      }
+    } else {
+      // 如果清空选择，也清空oldMileage
+      formData.value.oldMileage = undefined
+    }
+    // 只有在有车表里程数值时才触发校验，避免初始化时触发
     if (formData.value.mileage !== undefined && formData.value.mileage !== null) {
       formRef.value?.validateField('mileage')
     }
@@ -205,6 +216,7 @@ const submitForm = async () => {
     const selectedCar = carInfoList.value.find((car) => car.id === formData.value.carId)
     if (selectedCar && selectedCar.carNumber) {
       formData.value.carNumber = selectedCar.carNumber
+      formData.value.oldMileage = selectedCar.mileage
     }
   }
   // 提交请求

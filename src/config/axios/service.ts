@@ -114,7 +114,7 @@ service.interceptors.response.use(
     const config = response.config
     if (!data) {
       // 返回“[HTTP]请求没有返回值”;
-      throw new Error()
+      // throw new Error()
     }
 
     // 检查是否需要解密响应数据
@@ -216,7 +216,8 @@ service.interceptors.response.use(
       } else {
         ElNotification.error({ title: msg })
       }
-      return Promise.reject('error')
+      // reject 一个包含错误信息的对象，以便在 catch 中获取后台返回的错误信息
+      return Promise.reject({ response: { data: { msg, code } } })
     } else {
       return data
     }

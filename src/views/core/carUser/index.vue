@@ -49,7 +49,7 @@
       <el-table-column label="序号" align="center" type="index" width="55" />
       <el-table-column
         prop="name"
-        label="名称"
+        label="姓名"
         min-width="150"
         align="center"
         show-overflow-tooltip
@@ -89,6 +89,8 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { CarUserApi, CarUser } from '@/api/core/carinfo/carUser'
 import CarUserForm from './CarUserForm.vue'
+
+import { saveAs } from 'file-saver'
 
 defineOptions({ name: 'CarUser' })
 
@@ -174,7 +176,7 @@ const handleExport = async () => {
     // 发起导出
     exportLoading.value = true
     const data = await CarUserApi.exportCarUser(queryParams)
-    download.excel(data, '人员信息.xls')
+    saveAs(data, '人员信息.xlsx')
   } catch {
   } finally {
     exportLoading.value = false

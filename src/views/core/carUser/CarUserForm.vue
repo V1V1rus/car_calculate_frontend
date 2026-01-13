@@ -7,7 +7,7 @@
       label-width="100px"
       v-loading="formLoading"
     >
-      <el-form-item label="名称" prop="name">
+      <el-form-item label="姓名" prop="name">
         <el-input v-model="formData.name" placeholder="请输入" />
       </el-form-item>
     </el-form>
@@ -35,7 +35,7 @@ const formData = ref({
   name: undefined
 })
 const formRules = reactive({
-  name: [{ required: true, message: '名称不能为空', trigger: 'blur' }]
+  name: [{ required: true, message: '姓名不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 

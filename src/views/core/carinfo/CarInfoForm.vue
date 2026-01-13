@@ -10,7 +10,7 @@
       <el-form-item label="车牌号" prop="carNumber">
         <el-input v-model="formData.carNumber" placeholder="请输入" />
       </el-form-item>
-      <el-form-item label="公里数" prop="mileage">
+      <el-form-item label="车表里程数" prop="mileage">
         <el-input-number v-model="formData.mileage" placeholder="请输入" :min="0" :precision="2" />
       </el-form-item>
     </el-form>
@@ -40,7 +40,7 @@ const formData = ref({
 })
 const formRules = reactive({
   carNumber: [{ required: true, message: '车牌号不能为空', trigger: 'blur' }],
-  mileage: [{ required: true, message: '公里数不能为空', trigger: 'blur' }]
+  mileage: [{ required: true, message: '车表里程数不能为空', trigger: 'blur' }]
 })
 const formRef = ref() // 表单 Ref
 

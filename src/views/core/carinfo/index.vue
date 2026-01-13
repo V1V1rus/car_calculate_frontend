@@ -56,7 +56,7 @@
       />
       <el-table-column
         prop="mileage"
-        label="公里数"
+        label="车表里程数"
         min-width="150"
         align="center"
         show-overflow-tooltip
@@ -96,6 +96,8 @@ import { dateFormatter } from '@/utils/formatTime'
 import download from '@/utils/download'
 import { CarInfoApi, CarInfo } from '@/api/core/carinfo'
 import CarInfoForm from './CarInfoForm.vue'
+
+import { saveAs } from 'file-saver'
 
 /** 车辆信息 列表 */
 defineOptions({ name: 'CarInfo' })
@@ -181,7 +183,7 @@ const handleExport = async () => {
     // 发起导出
     exportLoading.value = true
     const data = await CarInfoApi.exportCarInfo(queryParams)
-    download.excel(data, '车辆信息.xls')
+    saveAs(data, '车辆信息.xlsx')
   } catch {
   } finally {
     exportLoading.value = false

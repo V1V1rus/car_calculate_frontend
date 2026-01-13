@@ -9,7 +9,9 @@ export interface CarFuel {
   fuelCharge?: number // 加油量
   money?: number // 加油金额
   unitPrice?: number // 油价
-  mileage?: number // 公里数
+  mileage?: number // 车表里程数
+  oldMileage?: number // 旧车表里程数
+  carUserName?: string // 用车人
 }
 
 export const CarFuelApi = {
@@ -39,5 +41,21 @@ export const CarFuelApi = {
 
   exportCarFuel: async (params) => {
     return await request.download({ url: `/core/car-fuel/export-excel`, params })
+  },
+
+  createCarFuelJourney: async (data: CarFuel) => {
+    return await request.post({ url: `/core/car-fuel/createJourney`, data })
+  },
+
+  reCreateCarFuelJourney: async (data: CarFuel) => {
+    return await request.post({ url: `/core/car-fuel/reCreateJourney`, data })
+  },
+
+  getJourneyList: async (id: number) => {
+    return await request.get({ url: `/core/car-fuel/getJourneyList?id=` + id })
+  },
+
+  exportJourney: async (id: number) => {
+    return await request.download({ url: `/core/car-fuel/export-journey?id=` + id })
   }
 }

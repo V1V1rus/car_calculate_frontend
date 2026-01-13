@@ -97,6 +97,8 @@ import download from '@/utils/download'
 import { CarDestinationApi, CarDestination } from '@/api/core/carinfo/carDestination'
 import CarDestinationForm from './CarDestinationForm.vue'
 
+import { saveAs } from 'file-saver'
+
 defineOptions({ name: 'CarDestination' })
 
 const message = useMessage() // 消息弹窗
@@ -180,7 +182,7 @@ const handleExport = async () => {
     // 发起导出
     exportLoading.value = true
     const data = await CarDestinationApi.exportCarDestination(queryParams)
-    download.excel(data, '目的地信息.xls')
+    saveAs(data, '目的地信息.xlsx')
   } catch {
   } finally {
     exportLoading.value = false

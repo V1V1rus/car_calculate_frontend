@@ -5,7 +5,7 @@ import type { Dayjs } from 'dayjs'
 export interface CarInfo {
   id: number // 编号
   carNumber?: string // 名字
-  mileage?: number // 公里数
+  mileage?: number // 车表里程数
 }
 
 // 车辆信息 API
