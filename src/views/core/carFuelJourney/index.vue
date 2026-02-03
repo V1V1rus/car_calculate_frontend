@@ -29,7 +29,7 @@
     <el-table row-key="id" v-loading="loading" :data="list" :stripe="true" :show-overflow-tooltip="true">
       <el-table-column label="序号" align="center" type="index" width="55" fixed="left" />
       <el-table-column prop="carUserName" label="用车人" min-width="150" align="center" show-overflow-tooltip />
-      <el-table-column prop="useDate" label="用车时间" min-width="150" align="center" show-overflow-tooltip :formatter="dateFormatter2"/>
+      <el-table-column prop="useDate" label="还车时间" min-width="150" align="center" show-overflow-tooltip :formatter="dateFormatter"/>
       <el-table-column prop="carNumber" label="车牌号" min-width="150" align="center" show-overflow-tooltip fixed="left" />
       <el-table-column prop="place" label="地点" min-width="150" align="center" show-overflow-tooltip/>
       <el-table-column prop="distance" label="距离" min-width="150" align="center" show-overflow-tooltip/>
@@ -47,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { dateFormatter2 } from '@/utils/formatTime'
+import { dateFormatter } from '@/utils/formatTime'
 import { CarFuelJourneyApi, CarFuelJourney } from '@/api/core/carinfo/carFuelJourney'
 
 import { saveAs } from 'file-saver'
@@ -99,7 +99,7 @@ const handleExportJourney = async () => {
   try {
     exportJourneyLoading.value = true
     const data = await CarFuelJourneyApi.exportCarFuelJourney(queryParams)
-    const fileName = `行程单.xlsx`
+    const fileName = `行程记录.xlsx`
     saveAs(data, fileName)
     message.success('导出行程单成功')
   } catch (error) {
