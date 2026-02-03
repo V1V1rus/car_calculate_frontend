@@ -11,7 +11,6 @@ export interface CarFuel {
   unitPrice?: number // 油价
   mileage?: number // 车表里程数
   oldMileage?: number // 旧车表里程数
-  carUserName?: string // 用车人
 }
 
 export const CarFuelApi = {
@@ -57,5 +56,13 @@ export const CarFuelApi = {
 
   exportJourney: async (id: number) => {
     return await request.download({ url: `/core/car-fuel/export-journey?id=` + id })
-  }
+  },
+
+  importTemplate: async () => {
+    return await request.download({ url: `/core/car-fuel/template` })
+  },
+
+  importCarFuel: async (data: FormData) => {
+    return await request.upload({ url: `/core/car-fuel/importCarFurl`, data })
+  },
 }

@@ -35,6 +35,9 @@
         <el-button type="primary" plain @click="openForm('create')">
           <Icon icon="ep:plus" class="mr-5px" /> 新增
         </el-button>
+        <el-button type="warning" plain @click="handleImport" :loading="exportLoading">
+          <Icon icon="ep:upload" class="mr-5px" /> 导入
+        </el-button>
         <el-button type="success" plain @click="handleExport" :loading="exportLoading">
           <Icon icon="ep:download" class="mr-5px" /> 导出
         </el-button>
@@ -158,7 +161,6 @@
         }}</el-descriptions-item>
         <el-descriptions-item label="车表里程数">{{ currentCarFuel.mileage }}</el-descriptions-item>
         <el-descriptions-item label="加油金额">{{ currentCarFuel.money }}</el-descriptions-item>
-        <el-descriptions-item label="用车人">{{ currentCarFuel.carUserName }}</el-descriptions-item>
       </el-descriptions>
       <el-table
         v-loading="journeyLoading"
@@ -167,6 +169,21 @@
         :show-overflow-tooltip="true"
       >
         <el-table-column label="序号" align="center" type="index" width="55" />
+        <el-table-column
+          label="用车人"
+          prop="carUserName"
+          min-width="150"
+          align="center"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          label="用车时间"
+          prop="useDate"
+          min-width="150"
+          align="center"
+          :formatter="dateFormatter"
+          show-overflow-tooltip
+        />
         <el-table-column
           label="地点"
           prop="place"
@@ -211,6 +228,28 @@
       </div>
     </ContentWrap>
   </Dialog>
+
+  <!-- 导入弹窗 -->
+  <Dialog v-model="importDialogVisible" title="导入加油信息" width="400">
+    <el-upload ref="uploadRef" v-model:file-list="fileList" :auto-upload="false" :disabled="importLoading"
+      :limit="1" :on-exceed="handleExceed" accept=".xlsx, .xls" action="none" drag>
+      <Icon icon="ep:upload" />
+      <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+      <template #tip>
+        <div class="el-upload__tip text-center">
+          <span>仅允许导入 xls、xlsx 格式文件。</span>
+          <el-link :underline="false" style="font-size: 12px; vertical-align: baseline" type="primary"
+            @click="downloadTemplate">
+            下载模板
+          </el-link>
+        </div>
+      </template>
+    </el-upload>
+    <template #footer>
+      <el-button :disabled="importLoading" type="primary" @click="submitImport">确 定</el-button>
+      <el-button @click="importDialogVisible = false">取 消</el-button>
+    </template>
+  </Dialog>
 </template>
 
 <script setup lang="ts">
@@ -218,6 +257,8 @@ import { isEmpty } from '@/utils/is'
 import { dateFormatter, dateFormatter2, formatDate } from '@/utils/formatTime'
 import { CarFuelApi, CarFuel } from '@/api/core/carinfo/carFuel'
 import CarFuelForm from './CarFuelForm.vue'
+import download from '@/utils/download'
+import type { UploadUserFile } from 'element-plus'
 
 import { saveAs } from 'file-saver'
 
@@ -237,6 +278,12 @@ const queryParams = reactive({
 })
 const queryFormRef = ref() // 搜索的表单
 const exportLoading = ref(false) // 导出的加载中
+
+/** 导入相关 */
+const importDialogVisible = ref(false) // 导入弹窗显示状态
+const importLoading = ref(false) // 导入加载状态
+const uploadRef = ref() // 上传组件引用
+const fileList = ref<UploadUserFile[]>([]) // 文件列表
 
 /** 查询列表 */
 const getList = async () => {
@@ -412,6 +459,59 @@ const handleExportJourney = async () => {
   } finally {
     exportJourneyLoading.value = false
   }
+}
+
+/** 导入按钮操作 */
+const handleImport = () => {
+  importDialogVisible.value = true
+  resetImportForm()
+}
+
+/** 下载模板 */
+const downloadTemplate = async () => {
+  try {
+    const data = await CarFuelApi.importTemplate()
+    download.excel(data, '加油信息导入模板.xlsx')
+  } catch (error) {
+    console.error('下载模板失败:', error)
+  }
+}
+
+/** 提交导入 */
+const submitImport = async () => {
+  if (fileList.value.length === 0) {
+    message.error('请上传文件')
+    return
+  }
+
+  importLoading.value = true
+  try {
+    const formData = new FormData()
+    formData.append('file', fileList.value[0].raw as Blob)
+    await CarFuelApi.importCarFuel(formData)
+    message.success('导入成功')
+    importDialogVisible.value = false
+    resetImportForm()
+    // 刷新列表
+    await getList()
+  } catch (error: any) {
+    message.error(error?.msg || '导入失败，请您重新上传！')
+  } finally {
+    importLoading.value = false
+  }
+}
+
+/** 重置导入表单 */
+const resetImportForm = () => {
+  fileList.value = []
+  nextTick(() => {
+    uploadRef.value?.clearFiles()
+  })
+}
+
+/** 文件数超出提示 */
+const handleExceed = () => {
+  message.error('最多只能上传一个文件！')
 }
 
 /** 初始化 **/
