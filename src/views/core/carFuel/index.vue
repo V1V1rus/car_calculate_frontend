@@ -367,21 +367,28 @@ const handleExport = async () => {
 }
 
 const createJourney = async (id: number, row?: CarFuel) => {
-  journeyLoading.value = true
-  // 保存当前选中的加油记录
-  if (row) {
-    currentCarFuel.value = row
+  try {
+    loading.value = true
+    journeyLoading.value = true
+    // 保存当前选中的加油记录
+    if (row) {
+      currentCarFuel.value = row
+    }
+    await CarFuelApi.createCarFuelJourney({ id: id })
+    await getList()
+    // 从刷新后的列表中获取最新的数据，更新 currentCarFuel
+    const updatedFuel = list.value.find((item) => item.id === id)
+    if (updatedFuel) {
+      currentCarFuel.value = updatedFuel
+    }
+    // 刷新行程单列表
+    await getJourneyList(id, updatedFuel || currentCarFuel.value || row)
+    message.success('生成行程单成功')
+} catch {
+  } finally {
+    journeyLoading.value = false
+    loading.value = false
   }
-  await CarFuelApi.createCarFuelJourney({ id: id })
-  await getList()
-  // 从刷新后的列表中获取最新的数据，更新 currentCarFuel
-  const updatedFuel = list.value.find((item) => item.id === id)
-  if (updatedFuel) {
-    currentCarFuel.value = updatedFuel
-  }
-  // 刷新行程单列表
-  await getJourneyList(id, updatedFuel || currentCarFuel.value || row)
-  message.success('生成行程单成功')
 }
 
 const getJourneyList = async (id: number, row?: CarFuel) => {
